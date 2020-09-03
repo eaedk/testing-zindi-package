@@ -1,10 +1,12 @@
-import setuptools
+import setuptools, sys
+
+subprocess.check_call([sys.executable, '-mr', 'pip', 'install', 'requirements.txt'])
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="zindi-package-beta", # Replace with your own username
+    name="zindi", # Replace with your own username
     version="0.0.1-beta",
     author="Example Author",
     author_email="user@zindi.africa",
