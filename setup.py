@@ -1,4 +1,4 @@
-import setuptools, sys
+import setuptools, sys, subprocess
 
 subprocess.check_call([sys.executable, '-mr', 'pip', 'install', 'requirements.txt'])
 
