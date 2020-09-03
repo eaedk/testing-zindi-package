@@ -5,7 +5,7 @@
 A user-friendly ZINDI package which allow Zindians to achieve all available tasks on ZINDI Platform using this package.
 
 ## Installation
-
+Copy and Paste the instruction below in a Terminal or Jupyter Notebook.
 ```bash
 pip install git+https://github.com/eaedk/testing-zindi-package.git
 ```
