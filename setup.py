@@ -1,6 +1,6 @@
 import setuptools, sys, subprocess
 
-subprocess.check_call([sys.executable, '-mr', 'pip', 'install', 'requirements.txt'])
+subprocess.check_call([sys.executable, '-m', 'pip', 'install','-r','requirements.txt'])
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
