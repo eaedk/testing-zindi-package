@@ -4,6 +4,12 @@
 
 A user-friendly ZINDI package which allow Zindians to achieve all available tasks on ZINDI Platform using this package.
 
+## Installation
+
+```bash
+pip install git+https://github.com/eaedk/testing-zindi-package.git
+```
+
 ## Usage
 
 ```python
