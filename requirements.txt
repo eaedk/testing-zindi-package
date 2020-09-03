@@ -1,4 +1,3 @@
 tdqm
 requests
 pandas
-getpass
