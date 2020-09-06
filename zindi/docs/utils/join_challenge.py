@@ -1,5 +1,5 @@
-def join_challenge( url, headers, ):
-    """Subscribe to a Zindi's challenge.
+def join_challenge( url, headers, code=False):
+    """Formated print the Zindi's challenge submission-board as table.
 
     Parameters
     ----------
