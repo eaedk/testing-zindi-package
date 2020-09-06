@@ -22,23 +22,26 @@ user = Zindian(username = my_username)
 #desired output
 [ 🟢 ] 👋🏾👋🏾 Welcome I_am_Zeus_AI 👋🏾👋🏾
 
-# get current challenge info if seleted
-user.which_challenge
 
 # select a new challenge
 user.select_a_challenge()
 
-# user.which_challenge
+# get current challenge info if seleted
+user.which_challenge
 
-# user.leaderboard()
+user.leaderboard()
 
-# user.my_rank
+user.my_rank
 
-# user.download_dataset(destination="tests/dataset")
+user.remaining_subimissions
+
+user.download_dataset(destination="tests/dataset")
 
 user.submit(filepaths=['tests/dataset/SampleSubmission.csv'])
 
 user.submission_board()
+
+user.remaining_subimissions
 
 user.create_team(team_name="New Team")
 
