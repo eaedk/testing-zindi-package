@@ -15,12 +15,21 @@ import requests, datetime
 from tqdm import tqdm
 
 
-
 # Class declaration and init
 class Zindian:
-    # __auth_data = ""
+    """Zindi user-friendly account manager."""
     
     def __init__(self, username, fixed_password=None):
+        """Singin, connect user to the Zindi platform.
+
+        Parameters
+        ----------
+        username : string
+            The challenger's username.
+        fixed_password : string, default=None
+            The challenger's password, for test.
+
+        """
         self.__headers = {'User-Agent' : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"}
         self.__base_api = "https://api.zindi.africa/v1/competitions"
         self.__auth_data = self.__signin(username, fixed_password) #auth & user data from Zindi server after signin
@@ -109,10 +118,10 @@ class Zindian:
 
         Parameters
         ----------
-        username : {'prize', 'points', 'knowledge' , 'all'}, default='all'
-            The reward of the challenges for top challengers.
-        fixed_password : types | values, default='all'
-            Description.
+        username : string
+            The challenger's username.
+        fixed_password : string, default=None
+            The challenger's password, for test.
 
         Returns
         -------
@@ -404,4 +413,3 @@ class Zindian:
         else:
             error_msg = f"\n[ 🔴 ] You have to select a challenge before to manage your team,\n\tuse the select_a_challenge method before.\n"
             raise Exception(error_msg)
-
