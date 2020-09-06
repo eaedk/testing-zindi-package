@@ -359,7 +359,7 @@ class Zindian:
             response = requests.post( url, headers=headers, data=data )
             response = response.json()['data']
             if "errors" in response :
-                error_msg = f"\n[ 🔴 ] {response['errors']}\n"
+                error_msg = f"\n[ 🔴 ] {response['errors']['base']}\n"
                 raise Exception(error_msg)
             else:
                 print(f"\n[ 🟢 ] {response}\n")
