@@ -8,8 +8,8 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="zindi", # Replace with your own username
     version="0.0.1-beta",
-    author="Example Author",
-    author_email="user@zindi.africa",
+    author="The CIA TEAM",
+    author_email="ai.team.future.coders.1@gmail.com",
     description="Zindi user-friendly package",
     long_description=long_description,
     long_description_content_type="text/markdown",
