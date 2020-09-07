@@ -23,27 +23,27 @@ user = Zindian(username = my_username)
 [ 🟢 ] 👋🏾👋🏾 Welcome I_am_Zeus_AI 👋🏾👋🏾
 
 
-# select a new challenge
-user.select_a_challenge()
+user.select_a_challenge()                               # Select a Zindi challenge
 
-# get current challenge info if seleted
-user.which_challenge
+user.which_challenge                                    # Get information about the selected challenge
 
-user.leaderboard()
+user.leaderboard()                              # Show the Leaderboard of the selected challenge
 
-user.my_rank
+user.my_rank                                    # Get the user's leaderboard rank
 
-user.remaining_subimissions
+user.remaining_subimissions                         # Get information about how many submission you can still push now to Zindi
 
-user.download_dataset(destination="tests/dataset")
+user.submission_board()                         # Show the user's Submission-board of the selected challenge
 
-user.submit(filepaths=['tests/dataset/SampleSubmission.csv'])
+user.download_dataset(destination="tests/dataset") # Download the dataset of the selected challenge
 
-user.submission_board()
+user.submit(filepaths=['tests/dataset/SampleSubmission.csv'], comments=['initial submission']) # Push a submission to Zindi : the SampleSubmission file 
 
-user.remaining_subimissions
+user.remaining_subimissions                             # Get information about how many submission you can still push now to Zindi
 
-user.create_team(team_name="New Team")
+user.submission_board()                             # Show the Submission-board of the selected challenge
+
+user.create_team(team_name="New Team")             # Create a team for the selected challenge
 
 ```
 
