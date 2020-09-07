@@ -52,7 +52,7 @@ user.create_team(team_name="New Team")             # Create a team for the selec
 In progress 🚧 . Check the progression state in the `features.txt` file.
 
 ## Documentation
-
+We will update this table soon ...
 <table class="table table-bordered table-hover table-condensed">
 <thead><tr><th title="Field #1">Source</th>
 <th title="Field #2">Element Type</th>
