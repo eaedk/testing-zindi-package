@@ -12,6 +12,8 @@ pip install git+https://github.com/eaedk/testing-zindi-package.git
 
 ## Usage
 
+You can check the [colab notebook here] (https://colab.research.google.com/drive/1zzAUWkJ8R5GQzxsdJ5i7XTxaGe2tmUF4?usp=sharing)
+
 ```python
 # create a user object
 from zindi.user import Zindian
