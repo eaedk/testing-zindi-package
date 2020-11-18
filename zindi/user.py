@@ -58,7 +58,7 @@ class Zindian:
             int_rank = self.__rank
             if int_rank == 0:
                 rank = f"not yet"
-            elif ( str(int_rank)[-1] == "1" ) and ( str(int_rank)[-2] != "1" ) :
+            elif ( str(int_rank)[-1] == "1" ) and ( int_rank > 11 ) :
                 rank = f"{int_rank}st"
             elif str(int_rank)[-1] == "2":
                 rank = f"{int_rank}nd"
