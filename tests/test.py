@@ -8,7 +8,7 @@ sys.path.append(parentdir)
 from zindi.user import Zindian
 
 ## FOR TEST
-USERNAME, PASSWORD = "eaedk", "Eaedk.01021999" # "####", "####"
+USERNAME, PASSWORD = "____", "____"
 user = Zindian(username=USERNAME, fixed_password=PASSWORD)
 
 user.which_challenge
