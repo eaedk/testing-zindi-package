@@ -23,7 +23,7 @@ user.my_rank
 
 # user.download_dataset(destination="tests/dataset")
 
-# user.submit(filepaths=['tests/dataset/SampleSubmission.csv'])
+# user.submit(filepaths=['tests/dataset/SampleSubmission.csv'], comments=['submission test'])
 
 # user.submission_board()
 

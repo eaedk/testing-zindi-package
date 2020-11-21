@@ -263,7 +263,7 @@ class Zindian:
                         # print(f"[INFO] Submiting file : {filepath} , wait ...")
                         # response = requests.post(url, headers=headers, files=file, data=data,)
                         # response = response.json()['data']
-                        response = upload(filepath=filepath, url=url, headers=headers)
+                        response = upload(filepath=filepath, comment=comment, url=url, headers={**headers,})
                         response = response.json()['data']
                         try:
                             print(f"\n[ 🔴 ] Something wrong with file :{filepath} ,\n{response['errors']}\n")

@@ -35,13 +35,15 @@ def download(url="https://", filename="", headers=''):
 
 
 # Upload a file
-def upload(filepath, url, headers):
+def upload(filepath, comment, url, headers):
     """Upload a file with progress bar.
 
     Parameters
     ----------
     filepath : string
         The local filepath of the file to upload.
+    comment : string
+        The comment for the file to upload.
     url : string
         The url of the file to upload.
     headers : dictionary
@@ -54,7 +56,7 @@ def upload(filepath, url, headers):
     """
 
     filename = (os.sep).join(filepath.split(os.sep)[-2:]) 
-    encoder = MultipartEncoder({'file': (filename, open(filepath, 'rb'), 'text/plain'),})
+    encoder = MultipartEncoder({'file': (filename, open(filepath, 'rb'), 'text/plain'), "comment":comment})
 
     with tqdm(desc=f"Submit {filename}",
               total=encoder.len, ncols=100,
@@ -64,7 +66,7 @@ def upload(filepath, url, headers):
         multipart_monitor = MultipartEncoderMonitor(encoder, lambda monitor: progress_bar.update(monitor.bytes_read - progress_bar.n))
         headers = {**headers, 'Content-Type': multipart_monitor.content_type,}
 
-        response = requests.post(url, data=multipart_monitor, headers= headers, )
+        response = requests.post(url, data=multipart_monitor, headers=headers, )
     return response
 
 
