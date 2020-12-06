@@ -1,6 +1,9 @@
 import setuptools, sys, subprocess
 
-output = subprocess.run([sys.executable, '-m', 'pip', 'install','-r','requirements.txt'])
+try:
+    output = subprocess.run([sys.executable, '-m', 'pip', 'install','-r','requirements.txt'])
+except:
+    output = subprocess.run(['pip', 'install','-r','requirements.txt'])
 
 try:
     with open("README.md", "r", encoding='utf8') as fh:
