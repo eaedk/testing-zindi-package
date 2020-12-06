@@ -2,8 +2,11 @@ import setuptools, sys, subprocess
 
 output = subprocess.run([sys.executable, '-m', 'pip', 'install','-r','requirements.txt'])
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+try:
+    with open("README.md", "r", encoding='utf8') as fh:
+        long_description = fh.read()
+except :
+    long_description = "A user-friendly ZINDI package which allow Zindians to achieve all available tasks on ZINDI Platform using this package."
 
 setuptools.setup(
     name="zindi", # Replace with your own username
