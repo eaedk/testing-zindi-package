@@ -410,7 +410,7 @@ class Zindian:
             error_msg = f"\n[ 🔴 ] You have to select a challenge before to manage your team,\n\tuse the select_a_challenge method before.\n"
             raise Exception(error_msg)
 
-## Disband ... think to add kick function to kick-off some selected teammates
+## Disband ... think to add kick function to kick-off some selected teammates... think to add team status (invited users, teammates)
     def disband_team(self, ):
         """Disband user team for the selected challenge."""
 
