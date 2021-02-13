@@ -59,12 +59,9 @@ In progress 🚧 . All listed functions in **Usage** part are working, but pleas
 
 We will update this table soon ... Now you can refer to the notebook and **Usage** section.
 
-<br>
-
 # Contributers
 
 <div align='center'>
-
 
 | <img src='https://media-exp1.licdn.com/dms/image/C5103AQEWceAkHjUwVw/profile-displayphoto-shrink_400_400/0/1582378323644?e=1618444800&v=beta&t=dgTb6nwVBgbNzFOs8CLvoM_p2gYal4t0gStKWvfzcmk' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Emmanuel KOUPOH                        | <img src='https://media-exp1.licdn.com/dms/image/C4D35AQGOLlRWnmK5UA/profile-framedphoto-shrink_800_800/0/1611062726937?e=1613314800&v=beta&t=IpUAuxmIMhOrhzAV9rQe3BTJz-6kSN8CUZK8RKf1Jso' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Cédric MANOUAN                      | <img src='https://media-exp1.licdn.com/dms/image/C4D03AQH1XHqqND9Syg/profile-displayphoto-shrink_400_400/0/1588010132707?e=1618444800&v=beta&t=SHEg3OdAElJk8dUF7UZ-hZr_ydRZV6fRJW-YUgl4Pxw' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Muhamed TUO                      |
 |--------------------------------------|-------------------------------|----------------------------------------------|
