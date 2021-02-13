@@ -53,7 +53,7 @@ user.create_team(team_name="New Team")             # Create a team for the selec
 
 ## Status
 
-In progress 🚧 . Check the progression state in the `features.txt` file.
+In progress 🚧 . All listed functions in **Usage** part are working, but please share issues with use and request features that you need.
 
 ## Documentation
 
@@ -79,3 +79,6 @@ We will update this table soon ...
 
 <br>
 </center>
+
+Dont forget to visite [ZINDI Plateform](www.zindi.africa)
+<img src='https://pbs.twimg.com/profile_images/1026842061587271680/NHtP1F7r_400x400.jpg' width='200' height='200' style='border-radius:50%; margin:.8cm'>
