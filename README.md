@@ -5,7 +5,9 @@
 A user-friendly ZINDI package which allow Zindians to achieve all available tasks on ZINDI Platform using this package.
 
 ## Installation
+
 Copy and Paste the instruction below in a Terminal or Jupyter Notebook.
+
 ```bash
 pip install git+https://github.com/eaedk/testing-zindi-package.git
 ```
@@ -39,7 +41,7 @@ user.submission_board()                         # Show the user's Submission-boa
 
 user.download_dataset(destination="tests/dataset") # Download the dataset of the selected challenge
 
-user.submit(filepaths=['tests/dataset/SampleSubmission.csv'], comments=['initial submission']) # Push a submission to Zindi : the SampleSubmission file 
+user.submit(filepaths=['tests/dataset/SampleSubmission.csv'], comments=['initial submission']) # Push a submission to Zindi : the SampleSubmission file
 
 user.remaining_subimissions                             # Get information about how many submission you can still push now to Zindi
 
@@ -54,95 +56,26 @@ user.create_team(team_name="New Team")             # Create a team for the selec
 In progress 🚧 . Check the progression state in the `features.txt` file.
 
 ## Documentation
+
 We will update this table soon ...
-<table class="table table-bordered table-hover table-condensed">
-<thead><tr><th title="Field #1">Source</th>
-<th title="Field #2">Element Type</th>
-<th title="Field #3">Name</th>
-<th title="Field #4">Description</th>
-</tr></thead>
-<tbody><tr>
-<td>utils</td>
-<td>function</td>
-<td>print_submission_board</td>
-<td>Formated print the Zindi&#39;s challenge submission-board as table.</td>
-</tr>
-<tr>
-<td>utils</td>
-<td>function</td>
-<td>join_challenge</td>
-<td>Subscribe to a Zindi&#39;s challenge</td>
-</tr>
-<tr>
-<td>utils</td>
-<td>function</td>
-<td>get_challenges</td>
-<td>Get the available Zindi&#39;s challenges using filter options.</td>
-</tr>
-<tr>
-<td>utils</td>
-<td>function</td>
-<td>challenge_idx_selector</td>
-<td>Get from the keyboard the index of the challenge tha the user want to participate in.</td>
-</tr>
-<tr>
-<td>utils</td>
-<td>function</td>
-<td>participations</td>
-<td>Check if user is in team for a the Zindi&#39;s challenges.</td>
-</tr>
-<tr>
-<td>utils</td>
-<td>function</td>
-<td>user_on_lb</td>
-<td>Get rank of user on the leaderboard for a the Zindi&#39;s challenges.</td>
-</tr>
-<tr>
-<td>utils</td>
-<td>function</td>
-<td>print_lb</td>
-<td>Formated print the Zindi&#39;s challenge leaderboard as table.</td>
-</tr>
-<tr>
-<td>utils</td>
-<td>function</td>
-<td>print_challenges</td>
-<td>Formated print the Zindi&#39;s challenge as table.</td>
-</tr>
-<tr>
-<td>utils</td>
-<td>function</td>
-<td>download</td>
-<td>Download a file with progress bar.</td>
-</tr>
-<tr>
-<td>user</td>
-<td>method</td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td>user</td>
-<td>method</td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td>user</td>
-<td>method</td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td>user</td>
-<td>property</td>
-<td> </td>
-<td> </td>
-</tr>
-<tr>
-<td>user</td>
-<td>property</td>
-<td> </td>
-<td> </td>
-</tr>
-</tbody></table>
+
+<br>
+
+# Contributers
+
+<center>
+<div >
+    <img src='https://media-exp1.licdn.com/dms/image/C5103AQEWceAkHjUwVw/profile-displayphoto-shrink_400_400/0/1582378323644?e=1618444800&v=beta&t=dgTb6nwVBgbNzFOs8CLvoM_p2gYal4t0gStKWvfzcmk' width='100' height='100' style='border-radius:50%; margin:.8cm'>
+
+<img src='https://media-exp1.licdn.com/dms/image/C4D35AQGOLlRWnmK5UA/profile-framedphoto-shrink_800_800/0/1611062726937?e=1613314800&v=beta&t=IpUAuxmIMhOrhzAV9rQe3BTJz-6kSN8CUZK8RKf1Jso' width='100' height='100' style='border-radius:50%; margin:.8cm'>
+<img src='https://media-exp1.licdn.com/dms/image/C4D03AQH1XHqqND9Syg/profile-displayphoto-shrink_400_400/0/1588010132707?e=1618444800&v=beta&t=SHEg3OdAElJk8dUF7UZ-hZr_ydRZV6fRJW-YUgl4Pxw' width='100' height='100' style='border-radius:50%; margin:.8cm'>
+
+</div>
+
+| Emmanuel KOUPOH                                                                                | Cédric MANOUAN                                                                             | Muhamed TUO                                                              |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| [eaedk](https://github.com/eaedk)                                                              | [dric2018](https://github.com/dric2018)                                                    | [NazarioR9]('https://github.com/NazarioR9')                              |
+| [Emmanuel on linkedin](https://www.linkedin.com/in/esaïe-alain-emmanuel-dina-koupoh-7b974a17a) | [Cedric on linkedin](https://www.linkedin.com/in/cédric-pascal-emmanuel-manouan-ba9ba1181) | [Muhamed on linkedin](https://www.linkedin.com/in/muhamed-tuo-b1b3a0162) |
+
+<br>
+</center>
