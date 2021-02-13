@@ -11,15 +11,16 @@ from zindi.user import Zindian
 USERNAME, PASSWORD = "____", "____"
 user = Zindian(username=USERNAME, fixed_password=PASSWORD)
 
-user.which_challenge
+# user.which_challenge
 
-user.select_a_challenge(reward="knowledge" , fixed_index=2) # 
+user.select_a_challenge(fixed_index=3) # reward="knowledge" , 
 
 user.which_challenge
 
 # user.leaderboard()
 
 user.my_rank
+user.create_team(team_name ='My team' , teammates=['I_am_Zeus_AI', 'Muhamed_Tuo'])
 
 # user.download_dataset(destination="tests/dataset")
 

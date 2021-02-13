@@ -340,13 +340,15 @@ class Zindian:
 
 # Team
 ## Create
-    def create_team(self, team_name):
+    def create_team(self, team_name, teammates=[]):
         """Create a team for the selected challenge.
 
         Parameters
         ----------
         team_name : string
             Name of the team to create.
+        teammates : list
+            List of usernames of Zindians you want to invite to be part of your team.
 
         """
 
@@ -357,11 +359,21 @@ class Zindian:
 
             response = requests.post( url, headers=headers, data=data )
             response = response.json()['data']
-            if "errors" in response :
-                error_msg = f"\n[ 🔴 ] {response['errors']['base']}\n"
-                raise Exception(error_msg)
+            if ("errors" in response) and ('Leader can only be' not in response['errors']['base']) :
+                
+                    error_msg = f"\n[ 🔴 ] {response['errors']['base']}\n"
+                    raise Exception(error_msg)
             else:
-                print(f"\n[ 🟢 ] {response}\n")
+                if 'Leader can only be a member of one team' in response['errors']['base'] :
+                        print(f"\n[ 🟢 ] You are already the leader of a team.\n")
+                else:
+                    # print(f"\n[ 🟢 ] {response}\n")
+                    print(f"\n[ 🟢 ] Your team is well created as :{response['title']}\n")
+                ##### Invite teammates
+                if len(teammates) > 0 :
+                    self.team_up(zindians=teammates)
+                else:
+                    print("You can send invitation to join your team using teamup function")
         else:
             error_msg = f"\n[ 🔴 ] You have to select a challenge before to manage your team,\n\tuse the select_a_challenge method before.\n"
             raise Exception(error_msg)
@@ -385,16 +397,20 @@ class Zindian:
                 data = {"username": zindian}
                 response = requests.post( url, headers=headers, data=data )
                 response = response.json()['data']
-                if "errors" in response :
-                    error_msg = f"\n[ 🔴 ] {response['errors']}\n"
-                    raise Exception(error_msg)
-                else:
-                    print(f"\n[ 🟢 ] {response}\n")
+                if ("errors" in response) :
+                    if 'already' in response['errors']['base'] :
+                        print(f"\n[ 🟢 ] An invitation has been sent already to join your team to: {zindian}\n")
+                    else:
+                        error_msg = f"\n[ 🔴 ] {response['errors']}\n"
+                        raise Exception(error_msg)
+                else :
+                    print(f"\n[ 🟢 ] An invitation has been sent to join your team to: {zindian}\n")
+
         else:
             error_msg = f"\n[ 🔴 ] You have to select a challenge before to manage your team,\n\tuse the select_a_challenge method before.\n"
             raise Exception(error_msg)
 
-## Disband
+## Disband ... think to add kick function to kick-off some selected teammates
     def disband_team(self, ):
         """Disband user team for the selected challenge."""
 
