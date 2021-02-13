@@ -364,10 +364,9 @@ class Zindian:
                     error_msg = f"\n[ 🔴 ] {response['errors']['base']}\n"
                     raise Exception(error_msg)
             else:
-                if 'Leader can only be a member of one team' in response['errors']['base'] :
+                if ("errors" in response) and ('Leader can only be' in response['errors']['base']):
                         print(f"\n[ 🟢 ] You are already the leader of a team.\n")
                 else:
-                    # print(f"\n[ 🟢 ] {response}\n")
                     print(f"\n[ 🟢 ] Your team is well created as :{response['title']}\n")
                 ##### Invite teammates
                 if len(teammates) > 0 :
@@ -398,7 +397,7 @@ class Zindian:
                 response = requests.post( url, headers=headers, data=data )
                 response = response.json()['data']
                 if ("errors" in response) :
-                    if 'already' in response['errors']['base'] :
+                    if 'is already invited' in response['errors']['base'] :
                         print(f"\n[ 🟢 ] An invitation has been sent already to join your team to: {zindian}\n")
                     else:
                         error_msg = f"\n[ 🔴 ] {response['errors']}\n"
