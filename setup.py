@@ -12,7 +12,7 @@ except :
     long_description = "A user-friendly ZINDI package which allow Zindians to achieve all available tasks on ZINDI Platform using this package."
 
 setuptools.setup(
-    name="zindi", # Replace with your own username
+    name="zindi", # 
     version="0.0.1-beta",
     author="The CIA TEAM",
     author_email="ai.team.future.coders.1@gmail.com",

@@ -1,2 +1,4 @@
 tests/test.py
+./tests/test.py
 zindi/__pycache__
+tests/*
