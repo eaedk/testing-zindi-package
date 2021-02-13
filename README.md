@@ -57,7 +57,7 @@ In progress 🚧 . All listed functions in **Usage** part are working, but pleas
 
 ## Documentation
 
-We will update this table soon ...
+We will update this table soon ... Now you can refer to the notebook and **Usage** section.
 
 <br>
 
@@ -73,8 +73,6 @@ We will update this table soon ...
 |[@eaedk😂](https://zindi.africa/users/eaedk) | [@Zeus😆](https://zindi.africa/users/I_am_Zeus_AI) |   [@Nazario😁](https://zindi.africa/users/Muhamed_Tuo)   |
 
 <br>
-
-
 
 
 Dont forget to visite [ZINDI Plateform](www.zindi.africa)<br>
