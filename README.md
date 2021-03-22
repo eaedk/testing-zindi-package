@@ -41,6 +41,19 @@ user.submission_board()                         # Show the user's Submission-boa
 
 user.download_dataset(destination="tests/dataset") # Download the dataset of the selected challenge
 
+"""Can you add the following code to Colab notebook
+
+train = pd.read_csv("./dataset/Train.csv")                      # View Training data location
+test = pd.read_csv("./dataset/Test.csv")                        # View Test data location
+sample_sub = pd.read_csv("./dataset/SampleSubmission.csv")
+
+prediction = model.predict(Test_data)                       # Create Predictions from test data
+results = {"ID": test.ID, "Label": prediction}              # Store Predictions in a dictionary
+results = pd.DataFrame(results)                             # store Predictions as a DataFrame
+results.to_csv("Submition.csv", index=False)                # Create a submission file
+
+"""
+
 user.submit(filepaths=['tests/dataset/SampleSubmission.csv'], comments=['initial submission']) # Push a submission to Zindi : the SampleSubmission file
 
 user.remaining_subimissions                             # Get information about how many submission you can still push now to Zindi
@@ -77,4 +90,4 @@ Dont forget to visite [ZINDI Plateform](www.zindi.africa)<br>
 
 
 </div>
-<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Africa&#39;s biggest inter-university machine learning hackathon is back for Round 2!! 🎉😁 <a href="https://twitter.com/hashtag/UmojaHackAfrica2021?src=hash&amp;ref_src=twsrc%5Etfw">#UmojaHackAfrica2021</a> is set to kick off on 27 March! So get your teams together and apply today! 🌈🌍 <a href="https://twitter.com/hashtag/BuildingAITogether?src=hash&amp;ref_src=twsrc%5Etfw">#BuildingAITogether</a> <a href="https://twitter.com/hashtag/ZindiHack?src=hash&amp;ref_src=twsrc%5Etfw">#ZindiHack</a><br>APPLY NOW👉<a href="https://t.co/bNqx0d5Odc">https://t.co/bNqx0d5Odc</a> <a href="https://t.co/Tgd4vZw9pb">pic.twitter.com/Tgd4vZw9pb</a></p>&mdash; Zindi (@ZindiAfrica) <a href="https://twitter.com/ZindiAfrica/status/1359502643849273351?ref_src=twsrc%5Etfw">February 10, 2021</a></blockquote> 
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Africa&#39;s biggest inter-university machine learning hackathon is back for Round 2!! 🎉😁 <a href="https://twitter.com/hashtag/UmojaHackAfrica2021?src=hash&amp;ref_src=twsrc%5Etfw">#UmojaHackAfrica2021</a> is set to kick off on 27 March! So get your teams together and apply today! 🌈🌍 <a href="https://twitter.com/hashtag/BuildingAITogether?src=hash&amp;ref_src=twsrc%5Etfw">#BuildingAITogether</a> <a href="https://twitter.com/hashtag/ZindiHack?src=hash&amp;ref_src=twsrc%5Etfw">#ZindiHack</a><br>APPLY NOW👉<a href="https://t.co/bNqx0d5Odc">https://t.co/bNqx0d5Odc</a> <a href="https://t.co/Tgd4vZw9pb">pic.twitter.com/Tgd4vZw9pb</a></p>&mdash; Zindi (@ZindiAfrica) <a href="https://twitter.com/ZindiAfrica/status/1359502643849273351?ref_src=twsrc%5Etfw">February 10, 2021</a></blockquote>
