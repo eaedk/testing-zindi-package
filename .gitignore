@@ -3,3 +3,4 @@ venv
 dist/*
 build/*
 *.egg-info
+dataset
