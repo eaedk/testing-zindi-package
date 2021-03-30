@@ -1,429 +1,391 @@
-# Imports
-
-import sys, os
-
-## To avoid errors of importing before instalation
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
-
-from zindi.utils import *
+import datetime
+import os
 from getpass import getpass
 
 import pandas as pd
-import requests, datetime
-from tqdm import tqdm
+import requests
+
+from zindi import utils
 
 
-# Class declaration and init
 class Zindian:
     """Zindi user-friendly account manager."""
-    
-    def __init__(self, username, fixed_password=None):
-        """Singin, connect user to the Zindi platform.
+
+    def __init__(self, username, password=None):
+        """Sing in to the Zindi platform as a user.
 
         Parameters
         ----------
         username : string
-            The challenger's username.
-        fixed_password : string, default=None
-            The challenger's password, for test.
+            The username for an account on Zindi.
+        password : string, default=None
+            The user's password.
 
         """
-        self.__headers = {'User-Agent' : "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"}
-        self.__base_api = "https://api.zindi.africa/v1/competitions"
-        self.__auth_data = self.__signin(username, fixed_password) #auth & user data from Zindi server after signin
-        self.__challenge_selected = False
+        self._username = username
+        self._base_url = "https://api.zindi.africa/v1"
+        self._challenge_selected = False
+        self._headers = {'User-Agent': "Mozilla/5.0 (X11; Linux x86_64)\
+AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"}
+        self._signin(username, password)
 
-# Properties
     @property
-    def which_challenge(self,):
-        """Property: Get the information about the selected challenge."""
+    def which_challenge(self):
+        """Get information about the currently selected challenge."""
 
-        if self.__challenge_selected:
-            msg = f"\n[ 🟢 ] You are currently enrolled in : {self.__challenge_data['id']} challenge,\n\t{self.__challenge_data['subtitle']}.\n" 
-            challenge = self.__challenge_data['id']
-        else:
-            msg = f"\n[ 🔴 ] You have not yet selected any challenge.\n"
-            challenge = None
-        print(msg)
-        return challenge
+        self._check_if_a_challenge_is_selected()
+
+        print(f"""
+[ 🟢 ] You are currently enrolled in: {self._challenge_data['id']} challenge,
+    {self._challenge_data['subtitle']}.""")
+
+        return self._challenge_data['id']
 
     @property
     def my_rank(self,):
-        """Property: Get the user rank on the leaderboard for the selected challenge."""
-        
-        if self.__challenge_selected:
-            self.leaderboard(to_print=False)
-            int_rank = self.__rank
-            if int_rank == 0:
-                rank = f"not yet"
-            elif ( str(int_rank)[-1] == "1" ) :
-                if ( str(int_rank)[-2] == "1" ) :
-                    rank = f"{int_rank}th"
-                else :
-                    rank = f"{int_rank}st"
-            elif str(int_rank)[-1] == "2":
-                rank = f"{int_rank}nd"
-            elif str(int_rank)[-1] == "3":
-                rank = f"{int_rank}rd"
-            else:
-                rank = f"{int_rank}th"
-            msg = f"\n[ 🟢 ] You are {rank} on the leaderboad of {self.__challenge_data['id']} challenge, Go on...\n" 
+        """Get the user's rank on the leaderboard for the selected challenge.
+        """
+        self._check_if_a_challenge_is_selected()
+
+        # Get leaderboard information
+        self.leaderboard(to_print=False)
+        # Nicely format the rank
+        if self._user_rank == 0:
+            rank = "not yet"
+        elif self._user_rank in range(11, 20) or self._user_rank % 10 == 0:
+            rank = f"{self._user_rank}th"
+        elif self._user_rank % 10 == 1:
+            rank = f"{self._user_rank}st"
+        elif self._user_rank % 10 == 2:
+            rank = f"{self._user_rank}nd"
+        elif self._user_rank % 10 == 3:
+            rank = f"{self._user_rank}rd"
         else:
-            msg = f"\n[ 🔴 ] You have not yet selected any challenge.\n"
-            int_rank = 0
-        print(msg)
-        return int_rank
+            rank = f"{self._user_rank}th"
+        print(f"""
+[ 🟢 ] You are {rank} on the leaderboad for {self._challenge_data['id']} \
+challenge. Carry on...
+""")
+        return self._user_rank
 
     @property
-    def remaining_subimissions(self, ):
-        """Property: Get the number of now remaining submissions for the selected challenge.
+    def remaining_submissions(self):
+        """Get the number of remaining submissions for the selected
+        challenge.
 
         Returns
         -------
-        free_submissions : int, default=n_subimissions_per_day.
-            The number of now remaining submissions.
+        free_submissions : int
+            The number of remaining submissions.
         """
-        if self.__challenge_selected:
-            url = self.__api
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
-            
-            free_submissions = None
-            n_sub = n_subimissions_per_day(url=url, headers=headers)
-            n_submitted_today = 0
-            self.submission_board( to_print=False)
-            sb_time = pd.DataFrame(self.__sb_data)
+        self._check_if_a_challenge_is_selected()
 
-            if n_sub > 0 :
-                if sb_time.shape[0] != 0:
-                    sb_time = sb_time[["id", "status", "created_at", "filename"]] # get useful columns
-                    sb_time['created_at'] = pd.to_datetime(sb_time['created_at']) # .tz_localize('UTC')
-                    sb_time['now'] = pd.to_datetime(datetime.datetime.utcnow()).tz_localize('UTC')
-                    sb_time['delta'] = (sb_time['now'] - sb_time['created_at'])
-                    n_submitted_today =  sb_time[ (sb_time.status.isin(["successful", "initial"])) & (sb_time.delta.dt.days < 1) ].shape[0]
-                    free_submissions = n_sub - n_submitted_today
-                else:
-                    free_submissions = n_sub
-            else:
-                free_submissions = n_sub
-            msg = f"\n[ 🟢 ] You have {free_submissions} remaining submissions for the challenge {self.__challenge_data['id']}.\n" 
-            print(msg)
+        daily_sub_limit = utils.n_subimissions_per_day(
+            url=self._competition_url, headers=self._headers)
+
+        # Get user's submission data
+        self.submission_board(to_print=False)
+        submissions_df = pd.DataFrame(self._submission_data)
+
+        if submissions_df.shape[0] != 0:  # If submissions have been made
+            # Select useful columns
+            submissions_df = submissions_df[
+                ["id", "status", "created_at", "filename"]
+            ]
+            # Make time-zone aware
+            submissions_df['created_at'] = pd.to_datetime(
+                submissions_df['created_at']
+            )
+            submissions_df['now'] = pd.to_datetime(
+                datetime.datetime.utcnow()
+            ).tz_localize('UTC')
+            submissions_df['delta'] = (
+                submissions_df['now'] - submissions_df['created_at']
+            )
+            n_submitted_today = submissions_df[
+                (submissions_df.status.isin(["successful", "initial"]))
+                & (submissions_df.delta.dt.days < 1)
+            ].shape[0]
+            free_submissions = daily_sub_limit - n_submitted_today
         else:
-            msg = f"\n[ 🔴 ] You have not yet selected any challenge.\n"
-            print(msg)
+            free_submissions = daily_sub_limit
+
+        print(f"""
+[ 🟢 ] You have {free_submissions} remaining submissions for the challenge \
+{self._challenge_data['id']}
+""")
+
         return free_submissions
 
-# Account
-## Sign In
-    def __signin(self, username ,fixed_password=None):
-        """Singin, connect user to the Zindi platform.
+    def _signin(self, username, password=None):
+        """Sing in to the Zindi platform.
 
         Parameters
         ----------
         username : string
-            The challenger's username.
-        fixed_password : string, default=None
-            The challenger's password, for test.
-
-        Returns
-        -------
-        auth_data :  dictionary | json
-            The json's response of the sign in request.
+            The username for the user's account on Zindi.
+        password : string, default=None
+            The user's password.
         """
+        if password is None:
+            password = getpass(prompt='Please enter your password: ')
+        # Sign in using the collected username and password
+        response = requests.post(
+            url=f"{self._base_url}/auth/signin", headers=self._headers,
+            data={"username": username, "password": password}
+        ).json()['data']
 
-        auth_data = None
-        url = "https://api.zindi.africa/v1/auth/signin"
-        if fixed_password == None:
-            password = getpass(prompt='Your password\n>> ')
+        if "errors" in response:
+            raise Exception(f"[ 🔴 ] {response['errors']}")
         else:
-            password = fixed_password
-        data = {"username": username, "password": password }
+            print(f"""
+[ 🟢 ] 👋🏾👋🏾 Welcome {response['user']['username'] } 👋🏾👋🏾""")
+        # Add auth token to headers
+        self._headers["auth_token"] = response["auth_token"]
 
+    def _check_if_a_challenge_is_selected(self):
+        """Check whether a challenge is selected. Raises an exception if none
+        is currently selected.
+        """
+        if not self._challenge_selected:
+            raise Exception("[ 🔴 ] Please select a challenge first")
 
-        response = requests.post( url, data=data , headers=self.__headers )
-        response = response.json()['data']
-        if "errors" in response : 
-            error_msg = f"[ 🔴 ] {response['errors']}"
-            raise Exception(error_msg)
-        else:
-            print( f"\n[ 🟢 ] 👋🏾👋🏾 Welcome {response['user']['username'] } 👋🏾👋🏾\n" )
-            auth_data = response
-        return auth_data
-
-
-# Challenge
-## Select a challenge to participate in
-    def select_a_challenge(self, reward='all', kind='all', active='all', fixed_index=None):
-        """Select a challenge among those available on Zindi, using filter options.
+    def select_a_challenge(self, reward='all', kind='all', active='all',
+                           fixed_index=None):
+        """Select a challenge among those available on Zindi.
 
         Parameters
         ----------
         reward : {'prize', 'points', 'knowledge' , 'all'}, default='all'
-            The reward of the challenges for top challengers.
+            The type of prize for the challenges.
         kind : {'competition', 'hackathon', 'all'}, default='all'
-            The kind of the challenges.
+            The kind of challenge.
         active : {True, False, 'all'}, default='all'
             The status of the challenges.
-
         fixed_index : int, default=None
-            The set index of the selected challenge : for test.
-
+            The set index of the selected challenge (for tests).
         """
-
-        headers = self.__headers 
-        url = self.__base_api 
-        challenges_data = get_challenges(reward=reward, kind=kind, active=active, url=url, headers=headers )
+        challenges_data = utils.get_challenges(
+            reward=reward, kind=kind, active=active, headers=self._headers,
+            url=f'{self._base_url}/competitions'
+        )
         n_challenges = challenges_data.shape[0]
 
         if fixed_index is None:
-            print_challenges( challenges_data=challenges_data )
-            challenge_index = challenge_idx_selector(n_challenges)
+            utils.print_challenges(challenges_data=challenges_data)
+            challenge_index = utils.challenge_idx_selector(n_challenges)
+
+        elif isinstance(fixed_index, int) and (fixed_index > -1):
+            challenge_index = fixed_index
+            if (challenge_index > n_challenges):
+                raise Exception('Invalid challenge_index > n_challenges')
         else:
-            error_msg = f"\n[ 🔴 ] The parameter 'fixed_index' must be an integer in range(0, {n_challenges}) to be valid.\n"
-            try:
-                if isinstance(fixed_index, int) and (fixed_index > -1) :
-                    challenge_index = fixed_index
-                    if (challenge_index > n_challenges) :
-                        raise Exception(error_msg)
-                else:
-                    raise Exception(error_msg)
-            except Exception as e:
-                print("\n[ 🔴 ] The parameter 'fixed_index' value must be None or a valid integer.\n")
-                raise Exception(e)
-        if challenge_index > -1 :
-            self.__challenge_data = challenges_data.iloc[challenge_index]
-            self.__api = f"{self.__base_api}/{self.__challenge_data['id']}"
-            self.__challenge_selected = True
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
-            url=f"{self.__api}/participations"
-            print(f"\n[ 🟢 ] You choose the challenge : {self.__challenge_data['id']},\n\t{self.__challenge_data['subtitle']}.\n")
-            join_challenge( url=url, headers=headers, )
-            
-            
-## Download dataset
-    def download_dataset(self, destination=".", make_destination=True ):
-        """Download the dataset of the selected challenge.
+            raise Exception("""[ 🔴 ] The parameter 'fixed_index' value must \
+be None or a valid integer.""")
+
+        if challenge_index > -1:
+            self._challenge_data = challenges_data.iloc[challenge_index]
+            self._competition_url = f"""{self._base_url}/competitions/\
+{self._challenge_data['id']}"""
+            self._challenge_selected = True
+
+            print(f"""
+[ 🟢 ] You have chosem the challenge : {self._challenge_data['id']},
+    {self._challenge_data['subtitle']}.
+""")
+            utils.join_challenge(
+                url=f"{self._competition_url}/participations",
+                headers=self._headers)
+
+    def download_dataset(self, destination=".", make_destination=True):
+        """Download the dataset for the selected challenge.
 
         Parameters
         ----------
-        destination : int, default='.'
-            The dataset's destination folder .
-        make_destination : boolean, default=True
-            Create destination folder if doesn't exist.
-
+        destination : str, default='.'
+            The dataset's destination folder.
         """
+        self._check_if_a_challenge_is_selected()
 
-        if not os.path.isdir(destination):
+        if make_destination and not os.path.isdir(destination):
             os.makedirs(destination, exist_ok=True)
-        if self.__challenge_selected :
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
-            url = self.__api
 
-            response = requests.get( url,  headers=headers )
-            datafiles = response.json()['data']['datafiles']
+        response = requests.get(
+            self._competition_url, headers=self._headers
+        ).json()['data']
 
-            # DOWNLOAD FILES USING ANOTHER METHOD TO SAVE THE ABILITY OF MULTIPROCESSING
-            [ download(url=f"{url}/files/{data['filename']}", filename=os.path.join(destination, data['filename']), headers=headers) 
-            for data in datafiles]
-            
-        else:
-            error_msg = f"\n[ 🔴 ] You have to select a challenge before to downoad a dataset,\n\tuse the select_a_challenge method before.\n"
-            raise Exception(error_msg)
-        
+        [utils.download(
+            url=f"{self._competition_url}/files/{data['filename']}",
+            headers=self._headers,
+            filename=os.path.join(destination, data['filename']))
+            for data in response['datafiles']]
 
-## Push submission file
-    def submit(self, filepaths=[], comments=[]):
-        """Push submission files for the selected challenge to Zindi platform.
+    def submit(self, filepaths=None, comments=None):
+        """Push submission files for the selected challenge to the Zindi
+        platform.
 
         Parameters
         ----------
         filepaths : list
             The filepaths of submission files to push.
         comments : list
-            The comments of submission files to push.
-
+            The comments for submission files to push.
         """
+        self._check_if_a_challenge_is_selected()
 
-        if self.__challenge_selected :
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
-            url = f"{self.__api}/submissions"
-            # self.submit__ = url
-            allowed_extensions = [ 'csv', ]
-            if len(comments) < len(filepaths):
-                n_blank_comment = len(filepaths) - len(comments)
-                comments += ['']*n_blank_comment
+        allowed_extensions = ['csv']
 
-            for filepath, comment in zip(filepaths, comments):
-                extension = filepath.split(".")[-1].strip().lower()
-                if extension in allowed_extensions:
-                    if os.path.isfile(filepath):
-                        # print(f"[INFO] Submiting file : {filepath} , wait ...")
-                        response = upload(filepath=filepath, comment=comment, url=url, headers=headers,)
+        if len(comments) != len(filepaths):
+            raise Exception('Unmatching number of files and comments')
+
+        for filepath, comment in zip(filepaths, comments):
+            extension = filepath.split(".")[-1].strip().lower()
+            if extension in allowed_extensions:
+                if os.path.isfile(filepath):
+                    try:
+                        response = utils.upload(
+                            filepath=filepath, comment=comment,
+                            url=f"{self._competition_url}/submissions",
+                            headers=self._headers,)
                         response = response.json()['data']
-                        try:
-                            print(f"\n[ 🔴 ] Something wrong with file :{filepath} ,\n{response['errors']}\n")
-                        except:
-                            print(f"\n[ 🟢 ] Submission ID: {response['id'] } - File submitted : {filepath}\n")
-                    else:
-                        print(f"\n[ 🔴 ] File doesn't exists, please verify this filepath : {filepath}\n")
+                        print(f"""
+[ 🟢 ] Submission ID: {response['id'] } - File submitted: {filepath}\n""")
+                    except Exception:
+                        print(f"""
+[ 🔴 ] Something is wrong with file: {filepath} ,\n{response['errors']}\n""")
+
                 else:
-                    print(f"\n[ 🔴 ] Submission file must be a CSV file ( .csv ),\n\tplease verify this filepath : {filepath}\n")
-        else:
-            error_msg = f"\n[ 🔴 ] You have to select a challenge before to push any submission file,\n\tuse the select_a_challenge method before.\n"
-            raise Exception(error_msg)
-            
+                    print(f"""
+[ 🔴 ] File doesn't exists, please verify this filepath : {filepath}\n""")
+            else:
+                print(f"""
+[ 🔴 ] Submission file must be a CSV file ( .csv ),
+    please verify this filepath : {filepath}\n""")
 
-## Show leaderboard
     def leaderboard(self, to_print=True):
-        """Get the leaderboard and upadte the user rank for the selected challenge.
+        """Get the leaderboard and update the user rank for the selected
+        challenge.
 
         Parameters
         ----------
         to_print : boolean, default=True
-            Display the leaderboard or not.
-
+            Wether to display the leaderboard or not.
         """
+        self._check_if_a_challenge_is_selected()
 
-        if self.__challenge_selected :
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
-            url = f"{self.__api}/participations"
-            per_page = 100000
-            params_in_url = { "page": 0, "per_page": per_page,}
+        response = requests.get(
+            f"{self._competition_url}/participations", headers=self._headers,
+            params={"page": 0, "per_page": 1000}
+        ).json()['data']
 
-            response = requests.get( url, headers=headers, params=params_in_url )
-            response = response.json()['data']
-            if "errors" in response :
-                error_msg = f"\n[ 🔴 ] {response['errors']}\n"
-                raise Exception(error_msg)
-            else:
-                self.__challengers_data = response
-                self.__rank = user_on_lb(challengers_data=self.__challengers_data, challenge_id=self.__challenge_data['id'], username=self.__auth_data['user']['username'], headers=headers)
-                if to_print:
-                    print_lb(challengers_data=self.__challengers_data, user_rank=self.__rank)
+        if "errors" in response:
+            raise Exception(f"[ 🔴 ] {response['errors']}")
         else:
-            error_msg = f"\n[ 🔴 ] You have to select a challenge before to get the leaderboard,\n\tuse the select_a_challenge method before.\n"
-            raise Exception(error_msg)
+            self._user_data = response
+            self._user_rank = utils.user_on_lb(
+                challengers_data=self._user_data, headers=self._headers,
+                challenge_id=self._challenge_data['id'],
+                username=self._username,)
 
+            if to_print:
+                utils.print_lb(challengers_data=self._user_data,
+                               user_rank=self._user_rank)
 
-## Show Submission-board
     def submission_board(self, to_print=True):
-        """Get the submission-board for the selected challenge and upadte the private parameters __sb_data for compute remaining submissions.
+        """Get the submission-board for the selected challenge and update
+        _submission_data to compute remaining submissions.
 
         Parameters
         ----------
         to_print : boolean, default=True
-            Display the submission-board or not.
-
+            Whether to display the submission-board or not.
         """
+        self._check_if_a_challenge_is_selected()
 
-        #to add : number of submission, available subissions to do
-        if self.__challenge_selected :
-            url = f"{self.__api}/submissions"
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
+        response = requests.get(
+            f'{self._competition_url}/submissions', headers=self._headers,
+            params={"per_page": 1000}
+        ).json()['data']
 
-            params_in_url = { "per_page": 1000 } # per_page : max number of subimission to retrieve
-            response = requests.get( url, headers=headers, params=params_in_url )
-            response = response.json()['data']
-            if "errors" in response :
-                error_msg = f"\n[ 🔴 ] {response['errors']}\n"
-                raise Exception(error_msg)
-            else:
-                self.__sb_data = response
-                # self.sb_data = response # for test
-                if to_print :
-                    print_submission_board(submissions_data=self.__sb_data)
+        if "errors" in response:
+            raise Exception(f"[ 🔴 ] {response['errors']}")
         else:
-            error_msg = f"\n[ 🔴 ] You have to select a challenge before to get the submission-board,\n\tuse the select_a_challenge method before.\n"
-            raise Exception(error_msg)
+            self._submission_data = response
 
+            if to_print:
+                utils.print_submission_board(self._submission_data)
 
-# Team
-## Create
-    def create_team(self, team_name, teammates=[]):
+    def create_team(self, team_name, teammates=None):
         """Create a team for the selected challenge.
 
         Parameters
         ----------
         team_name : string
             Name of the team to create.
-        teammates : list
-            List of usernames of Zindians you want to invite to be part of your team.
-
+        teammates : list, default=None
+            List of users you want to invite to be part of your team.
         """
+        self._check_if_a_challenge_is_selected()
 
-        if self.__challenge_selected :
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
-            url = f"{self.__api}/my_team"
-            data = {"title": team_name}
+        response = requests.post(
+            f"{self._competition_url}/my_team", headers=self._headers,
+            data={"title": team_name}
+        ).json()['data']
 
-            response = requests.post( url, headers=headers, data=data )
-            response = response.json()['data']
-            if ("errors" in response) and ('Leader can only be' not in response['errors']['base']) :
-                
-                    error_msg = f"\n[ 🔴 ] {response['errors']['base']}\n"
-                    raise Exception(error_msg)
+        if "errors" in response:
+            if 'Leader can only be' not in response['errors']['base']:
+
+                raise Exception(f"[ 🔴 ] {response['errors']['base']}")
+            elif 'Leader can only be' in response['errors']['base']:
+                print("\n[ 🟢 ] You are already the leader of a team.\n")
             else:
-                if ("errors" in response) and ('Leader can only be' in response['errors']['base']):
-                        print(f"\n[ 🟢 ] You are already the leader of a team.\n")
-                else:
-                    print(f"\n[ 🟢 ] Your team is well created as :{response['title']}\n")
-                ##### Invite teammates
-                if len(teammates) > 0 :
-                    self.team_up(zindians=teammates)
-                else:
-                    print("You can send invitation to join your team using teamup function")
-        else:
-            error_msg = f"\n[ 🔴 ] You have to select a challenge before to manage your team,\n\tuse the select_a_challenge method before.\n"
-            raise Exception(error_msg)
+                print(
+                    f"""
+[ 🟢 ] Your team is well created as :{response['title']}
+""")
+            # Invite team-mates
+            if len(teammates) > 0:
+                self.team_up(zindians=teammates)
+            else:
+                print("""You can send invitation to join your team using the \
+teamup function""")
 
-## Team Up
-    def team_up(self, zindians=[]):
-        """Add challengers to user team for the selected challenge.
+    def team_up(self, zindians=None):
+        """Create a team of users for the selected challenge.
 
         Parameters
         ----------
-        zindians : list
-            List of challenger's usernames of Zindians to add the team.
-
+        zindians : list, default=None
+            List of user usernames of Zindians.
         """
+        self._check_if_a_challenge_is_selected()
 
-        if self.__challenge_selected :
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
-            url = f"{self.__api}/my_team/invite"
+        for zindian in zindians:
+            # Send team-up request
+            response = requests.post(
+                f"{self._competition_url}/my_team/invite",
+                headers=self._headers, data={"username": zindian}
+            ).json()['data']
 
-            for zindian in zindians:
-                data = {"username": zindian}
-                response = requests.post( url, headers=headers, data=data )
-                response = response.json()['data']
-                if ("errors" in response) :
-                    if 'is already invited' in response['errors']['base'] :
-                        print(f"\n[ 🟢 ] An invitation has been sent already to join your team to: {zindian}\n")
-                    else:
-                        error_msg = f"\n[ 🔴 ] {response['errors']}\n"
-                        raise Exception(error_msg)
-                else :
-                    print(f"\n[ 🟢 ] An invitation has been sent to join your team to: {zindian}\n")
+            if ("errors" in response):
+                if 'is already invited' in response['errors']['base']:
+                    print(f"""
+[ 🟢 ] An invitation has been sent already to {zindian} to join your team""")
+                else:
+                    raise Exception(f"[ 🔴 ] {response['errors']}")
 
+# TODO add kick function to kick-off some selected teammates...
+# TODO add team status (invited users, teammates)
+    def disband_team(self):
+        """Disband a team in the selected challenge."""
+        self._check_if_a_challenge_is_selected()
+
+        # Send request to delete team
+        response = requests.delete(
+            f"{self._competition_url}/my_team", headers=self._headers
+        ).json()['data']
+
+        if "errors" in response:
+            raise Exception(f"[ 🔴 ] {response['errors']}")
         else:
-            error_msg = f"\n[ 🔴 ] You have to select a challenge before to manage your team,\n\tuse the select_a_challenge method before.\n"
-            raise Exception(error_msg)
-
-## Disband ... think to add kick function to kick-off some selected teammates... think to add team status (invited users, teammates)
-    def disband_team(self, ):
-        """Disband user team for the selected challenge."""
-
-        if self.__challenge_selected :
-            headers = {**self.__headers, "auth_token":self.__auth_data['auth_token'] }
-            url = f"{self.__api}/my_team"
-
-            response = requests.delete( url, headers=headers,)
-            response = response.json()['data']
-            if "errors" in response :
-                error_msg = f"\n[ 🔴 ] {response['errors']}\n"
-                raise Exception(error_msg)
-            else:
-                print(f"\n[ 🟢 ] {response}\n")
-        else:
-            error_msg = f"\n[ 🔴 ] You have to select a challenge before to manage your team,\n\tuse the select_a_challenge method before.\n"
-            raise Exception(error_msg)
+            print(f"\n[ 🟢 ] {response}\n")
