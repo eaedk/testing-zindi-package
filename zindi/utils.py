@@ -1,271 +1,261 @@
-import requests, os
-from requests_toolbelt import (MultipartEncoder,MultipartEncoderMonitor)
-from tqdm import tqdm
+import re
+from getpass import getpass
+from pathlib import Path
+
 import pandas as pd
+import requests
+from requests_toolbelt import MultipartEncoder, MultipartEncoderMonitor
+from tqdm import tqdm
 
-# Utils
 
-## Download a file
-def download(url="https://", filename="", headers=''):
-    """Download a file with progress bar.
+def file_download(url=None, filepath=None, headers=None):
+    """Download a file, while displaying a progress-bar.
 
     Parameters
     ----------
-    url : string
-        The url of the file to download.
-    filename : string
-        The local filename of the file to download.
-    headers : dictionary
-        The headers of the download's request.
+    url : str
+        The url for the file to download.
+    filepath : str
+        The local path for the file to download.
+    headers : dict
+        The headers passed in the download request.
     """
-
+    if filepath is None:
+        time_now = pd.to_datetime('now').strftime('%d-%b-%H:%m')
+        filepath = Path(f'zindi-download-{time_now}')
+    # Send a request for the file at the given url
     response = requests.post(url, headers=headers, stream=True)
-    response.raise_for_status() # check if there is no error
-    total = int(response.headers.get('content-length', 0))
-    with open(filename, 'wb') as file, tqdm(
-            desc=filename,
-            total=total,
-            unit='o',
-            unit_scale=True,
-            unit_divisor=1024,
-    ) as bar:
-        for data in response.iter_content(chunk_size=1024):
-            size = file.write(data)
-            bar.update(size)
+    # Check if a HTTPError occured
+    response.raise_for_status()
+    # Get number of 1KiB chunks
+    content_size_kib = int(response.headers.get('content-length', 0)) / 1024
+    # Write the content to file in 1KiB chunks
+    with filepath.open(mode='wb') as file:
+        for chunk in tqdm(response.iter_content(chunk_size=1024), unit='KiB',
+                          desc=filepath.name, total=content_size_kib):
+            file.write(chunk)
 
 
-# Upload a file
-def upload(filepath, comment, url, headers):
-    """Upload a file with progress bar.
+def file_upload(filepath, comment, url, headers):
+    """Upload a file while displaying a progress bar.
 
     Parameters
     ----------
-    filepath : string
-        The local filepath of the file to upload.
-    comment : string
+    filepath : pathlib.Path
+        The local path to the file to upload.
+    comment : str
         The comment for the file to upload.
-    url : string
-        The url of the file to upload.
-    headers : dictionary
-        The headers of the upload's request.
+    url : str
+        The url for the file to upload.
+    headers : dict
+        The headers for the upload's request.
 
     Returns
     -------
-    headers : dictionary | json
+    headers : dict | json
         The response of the upload's request.
     """
+    encoder = MultipartEncoder(
+        {"file": (filepath.name, filepath.open(mode='rb'), 'text/csv'),
+         "comment": comment}
+    )
+    with tqdm(desc=f"Submit {filepath.name}", total=encoder.len, ncols=100,
+              unit='KiB') as progress_bar:
+        multipart_monitor = MultipartEncoderMonitor(
+            encoder,
+            lambda monitor: progress_bar.update(monitor.bytes_read
+                                                - progress_bar.n))
+        headers['Content-Type'] = multipart_monitor.content_type
 
-    filename = (os.sep).join(filepath.split(os.sep)[-2:]) 
-    encoder = MultipartEncoder({'file': (filename, open(filepath, 'rb'), 'text/plain'), "comment":comment})
-
-    with tqdm(desc=f"Submit {filename}",
-              total=encoder.len, ncols=100,
-              unit='o', unit_scale=True,
-              unit_divisor=1024             ) as progress_bar :
-
-        multipart_monitor = MultipartEncoderMonitor(encoder, lambda monitor: progress_bar.update(monitor.bytes_read - progress_bar.n))
-        headers = {**headers, 'Content-Type': multipart_monitor.content_type,}
-
-        response = requests.post(url, data=multipart_monitor, headers=headers, )
+        response = requests.post(url, data=multipart_monitor, headers=headers)
     return response
 
 
-## Print
-### Challenges
 def print_challenges(challenges_data):
-    """Formated print the Zindi's challenge as table.
+    """Print Zindi challenges formated as table.
 
     Parameters
     ----------
-    challenges_data : dictionary | json
-        The json's response of the request to get informations about the challenges.
+    challenges_data : pandas.DataFrame
+        A dataframe with information on challenges.
     """
+    # Table header
+    print("_"*110)
+    print(f'|{"":^5}|{"":^14}|{"":^18}|{"":^20}|{"":^10}')
+    print(f'|{"index":^5}|{"challenge":^14.14}|{"problem":^18.18}',
+          f'|{"reward":^20.20}|{"id":^10}', sep='')
+    print(f'|{"":^5}|{"":^14}|{"":^18}|{"":^20}|{"":^10}')
+    # Table body
+    for idx, row in challenges_data.iterrows():
+        reward = row['reward']
+        challenge_id = f"{row['id'][:45]}..."
+        problem = ', '.join(row['type_of_problem'])
+        kind = "Hack" if row['kind'] == "hackathon" else "Compet"
+        visibility = 'Private' if row['secret_code_required'] else 'Public'
+        challenge = f"{visibility} {kind}"
+        print("-"*11)
+        print(f"|{idx:^5}|{challenge:^14.14}|{problem:^18.18}|{reward:^20.20}",
+              f"|{challenge_id}", sep='')
+    print(f"{'_'*110}\n\n")
 
-    n_challenges = challenges_data.shape[0] # total count of retreived challenges
-    print("_"*130 )
-    print("|{:^5}|{:^14.14}|{:^18.18}|{:^20.20}|{:^10}".format( "" , "" , "", "" , "" ,  ))
-    print("|{:^5}|{:^14.14}|{:^18.18}|{:^20.20}|{:^10}".format( "index" , "challenge" , "problem", "reward" , "id" ,  ))
-    print("|{:^5}|{:^14.14}|{:^18.18}|{:^20.20}|{:^10}".format( "" , "" , "", "" , "" ,  ))
-    # for data in challenges_data:
-    for i in range(n_challenges):
-        data = dict(challenges_data.iloc[i]) # data - each challenge, one after another
-        reward = data['reward'] # Challenge's reward for top challengers
-        id = data['id'][:50]+"..." # Challenge's id
-        problem = '' if  len(data['type_of_problem'])==0 else data['type_of_problem'][0] # category of the challenge's problem
-        kind = "Hack" if data['kind'] == "hackathon" else "Compet"  # simple challenge's kind
-        visibility = 'Public' if not data['secret_code_required'] else 'Private' # Challenge's visibility
-        challenge = f"{visibility} {kind}" # general challenge's kind - join visibility & kind 
-        print("-"*130 )
-        print ("|{:^5}|{:^14.14}|{:^18.18}|{:^20.20}| {:10}".format( i , challenge , problem , reward , id ,  ))
-    print(f"{'_'*130}\n\n" )   
 
-
-## Print
-### Leaderboard
-def print_lb(challengers_data, user_rank):
-    """Formated print the Zindi's challenge leaderboard as table.
+def print_leaderboard(challengers_data, user_rank):
+    """Print the Zindi challenge's leaderboard formated as table.
 
     Parameters
     ----------
-    challengers_data : dictionary | json
-        The json's response of the request to get informations about the leaderboard.
+    challengers_data : dict | json
+        The JSON response of the request for information about the leaderboard.
     user_rank : int
         The rank of the user on the leaderboard of a challenge.
     """
+    print("_"*110)
+    print(f"|{'':^6}|{'':^15}|{'':^44}|{'':^12}|{'':^12}")
+    print(f"|{'rank':^6}|{'score':^15}|{'name':^44}|{'counter':^12}|",
+          f"{'last_submission':^12}", sep='')
+    print(f"|{'':^6}|{'':^15}|{'':^44}|{'':^12}|{'':^12}")
 
-    print("_"*130 )
-    print("|{:^6}|{:^20}|{:^44}|{:^12}|{:^12}".format( "" , "" , "", "" ,"" ,  ))
-    print("|{:^6}|{:^20}|{:^44}|{:^12}|{:^12}".format( "rank" , "score" , "name", "counter", "last_submission" ,  ))
-    print("|{:^6}|{:^20}|{:^44}|{:^12}|{:^12}".format( "" , "" , "", "" ,"" ,  ))
-    # for data in challengers_data:
-    for i in range(len(challengers_data)):
-        data = challengers_data[i] # data - each row of the leaderboard
-        try:
-            score = data['best_private_score'] if "best_private_score" in data else data['best_public_score'] # Best submission's score
-            rank = data['private_rank'] if "private_rank" in data else data['public_rank'] # Rank on leaderboard
-            name = data['user']['username'] if "user" in data else f"TEAM - {data['team']['title']}" # Name of user or team
-            n_submission = data['submission_count']
-            last_submission = data['best_private_submitted_at'] if "best_private_submitted_at" in data else data['best_public_submitted_at']
-            check = str(last_submission)==str(None) # conditioin to set last_submission value
-            last_submission = '' if check==True else pd.to_datetime(str(last_submission)).strftime("%d %B %Y, %H:%M")
-            # Check rank to exclude not yet active challengers
-            if rank != None: 
-                if rank == user_rank:# Check rank to mark my position on the leaderboard
-                    name = f"{name} 🟢"
-                print("-"*130 )
-                print("|{:^6}|{:^20.20}|{:^44.44}|{:^12.12}|{:^12}".format( str(rank) , str(score) , str(name) , str(n_submission), str(last_submission), ))
-            else:
-                break # all the next zindians haven't made a correct submission yet
-        except Exception as e:
-            print(e)
-    print(f"{'_'*130}\n\n" )  
+    # Create table
+    ranked_user_data = challengers_data.dropna(subset=['public_rank'])
 
-
-## Print
-### Submission-board
-def print_submission_board(submissions_data):
-    """Formated print the Zindi's challenge submission-board as table.
-
-    Parameters
-    ----------
-    submissions_data : dictionary | json
-        The json's response of the request to get informations about the submission-board of a challenge.
-    """
-
-    print("_"*130 )
-    print("|{:^6}|{:^10}|{:^18}|{:^16}|{:^30} |{:^25}".format( "" , "" , "", "" ,"" , "" ,  ))
-    print("|{:^6}|{:^10}|{:^18}|{:^16}|{:^30} |{:^25}".format( "status" , "id" , "date", "score", "filename", "comment" ,  ))
-    print("|{:^6}|{:^10}|{:^18}|{:^16}|{:^30} |{:^25}".format( "" , "" , "", "" ,"" , "" ,  ))
-
-    for data in submissions_data:
-        filename = data['filename'] # Submission's filename
-        date = pd.to_datetime(data['created_at'] ).strftime("%d %b %Y, %H:%M") # Date of submission
-        id = data['id'] # submission's id
-        
-        if data['status'] in ["successful", "initial"]: 
-            status = "🟢" # Status - for valid of the submission
-            score = data['private_score'] if "private_score" in data else data['public_score'] # Score of the submission
-            score = "In processing" if score == None else score # Show a message when processing of the score is not yet finished
-            comment = "" if data['comment'] == None else data['comment'] # Comment of the submission
+    for _, row in ranked_user_data.iterrows():
+        if "best_private_score" in row:  # prefer private score
+            score = row['best_private_score']
+            last_submission = row['best_private_submitted_at']
         else:
-            score = "-" # Score of the submission : "-" for wrong submission
-            status = "🔴" # Status - for wrong of the submission
-            comment = "" if data['status_description'] == None else data['status_description'] # Submission error description
-        print("-"*130 )
-        try:
-            print("|{:^5}|{:^10}|{:^12}| {:^14.14} |{:30.30} |{:40.40}".format( status , id , date, str(score) , filename, comment ,  ))
-        except:
-            print("|{:^5}|{:^10}|{:^12}| {:^14.14} |{:30.30} |{:40.40}".format( status , id , date, "" , filename, "Oop there is an unknown bug, sorry !" ,  ))
-    print(f"{'_'*130}\n\n" )
+            score = row['best_public_score']
+            last_submission = row['best_public_submitted_at']
+        if "private_rank" in row:
+            rank = row['private_rank']
+        else:
+            rank = row['public_rank']
+        name = row['username_or_teamtitle']
+        n_submissions = row['submission_count']
+
+        # Mark user's position on the leaderboard
+        if rank == user_rank:
+            name = f"{name} 🟢"
+        # Print the leaderboard as a table
+        print("-"*110)
+        print(f"|{rank:^6.0f}|{score:^15.10f}|{name:^44.44}|",
+              f"{n_submissions:^12.0f}|{last_submission:^12}", sep='')
+    print(f"{'_'*110}\n\n")
 
 
-## Join challenge
-def join_challenge( url, headers, code=False):
-    """Formated print the Zindi's challenge submission-board as table.
+def print_submission_board(submissions_data):
+    """Print the Zindi challenge's submission-board formated as table.
 
     Parameters
     ----------
-    url : string
-        The url of the selected challenge.
-    headers : dictionary
-        The headers of the request to participate in a challenge.    
+    submissions_data : pandas.DataFrame
+        The JSON response to the request for information about the
+        submission-board of a challenge.
     """
 
-    # {secret_code: "cccccccccc"}
+    print("_"*110)
+    print(f"|{'':^6}|{'':^10}|{'':^20}|{'':^15}|{'':^25}|{'':^25}")
+    print(f"|{'status':^6}|{'id':^10}|{'date':^20}|{'score':^15}|",
+          f"{'filename':^25}|{'comment':^25}", sep='')
+    print(f"|{'':^6}|{'':^10}|{'':^20}|{'':^15}|{'':^25}|{'':^25}")
+
+    submissions_data['created_at_str'] = \
+        submissions_data['created_at'].dt.strftime("%d %b %Y, %H:%M")
+
+    for _, row in submissions_data.iterrows():
+        filename = row['filename']
+        date = row['created_at_str']
+        id = row['id']
+        comment = "" if row['comment'] is None else row['comment'][:25]
+
+        if row['status'] in {"successful", "initial"}:
+            status = "🟢"
+            if "private_score" in row:
+                score = row['private_score']
+            else:
+                score = row['public_score']
+        else:
+            status = "🔴"  # Status for invalid submission
+            score = "-"  # Score for invalid submission
+        # Create a table
+        print("-"*110)
+        print(f"|{status:^5}|{id:^10}|{date:^20}|{score:^15.10f}|",
+              f"{filename:^25.25}|{comment:25.25}", sep='')
+    print("-"*110)
+
+
+def join_challenge(url, headers, code=False):
+    """Print the Zindi challenge's submission-board formated as table.
+
+    Parameters
+    ----------
+    url : str
+        The url for the selected challenge.
+    headers : dict
+        The headers for the request to participate in a challenge.
+    """
     if not code:
-        response = requests.post( url=url, headers=headers )
+        response = requests.post(url=url, headers=headers)
     else:
-        secret_code = input("Enter the secret code to join the challenge.\n>>")
+        secret_code = getpass("Please enter the secret code to proceed.\n>> ")
         params = {'secret_code': secret_code}
-        response = requests.post( url=url, headers=headers, params=params )
+        response = requests.post(url=url, headers=headers, params=params)
 
     response = response.json()['data']
-    if "errors" in response : # raise error if request failed
+    if "errors" in response:  # raise error if the request failed
         error = response['errors']['message']
-        if error == "already in" :
-            # print(f"\n[ 🟢 ] {error}\n")
-            pass
-        elif error == "This competition requires a secret code to join." :
-            join_challenge( url, headers, code=True)
+        if error == "This competition requires a secret code to join.":
+            join_challenge(url, headers, code=True)
+        elif error == "already in":
+            print("You already joined this challenge.")
         else:
-            msg_error = f"\n[ 🔴 ] {error}\n"
-            raise Exception(msg_error)
-    else: # else print success message
-        if "ids" in response :
-            print(f"\n[ 🟢 ] Welcome for the first time to this challenge.\n")
+            raise Exception(f"Unexpected error: {error}")
+    else:
+        if "ids" in response:
+            print("\n[ 🟢 ] Welcome for the first time to this challenge.\n")
         else:
             print(f"\n[ 🟢 ] {response}.\n")
 
 
-## Get available challenges
-def get_challenges(reward='all', kind='all', active='all', url='', headers='' ):
+def get_challenges(reward='all', kind='all', url=None, headers=None):
     """Get the available Zindi's challenges using filter options.
 
     Parameters
     ----------
     reward : {'prize', 'points', 'knowledge' , 'all'}, default='all'
-        The reward of the challenges for top challengers.
+        The reward type for the challenges.
     kind : {'competition', 'hackathon', 'all'}, default='all'
-        The kind of the challenges.
-    active : {True, False, 'all'}, default='all'
-        The status of the challenges.
-
+        The kind of the challenge.
     url : string
-        The url of the selected challenge.
-    headers : dictionary
-        The headers of the request to participate in a challenge.  
+        The url to the challenge data.
+    headers : dict
+        The headers for the request to obtain challenge info.
 
     Returns
     -------
     challenges_data : pd.DataFrame
-        The response of the request to get informations about the available challenges.
+        A dataframe with details on the available challenges.
     """
-
-    to_show_challenge_data = ["id","kind",  "subtitle", "reward", "type_of_problem", "data_type", "secret_code_required", "sealed"]
-    challenges_data = pd.DataFrame()
-    
-    # check validity of challenge sorting's values
-    reward = '' if reward.lower() not in ['prize', 'points', 'knowledge' ] else reward.lower()
-    kind = '' if kind.lower() not in ['competition', 'hackathon'] else kind.lower()
-    active = '' if active.lower() not in [True, False] else int(active)
-    # join sorting params in a dictionary which will be passed in the url
-    sorting_params = dict(page=0, per_page=800, reward=reward, kind=kind, active=active )
-    
-    # request
-    response = requests.get( url, headers=headers , params=sorting_params)
-    response = response.json()['data']
-    try: # raise error if request failed
-        print( response['errors'] )
-    except: # else go on in processing
-        challenges_data = pd.DataFrame(response)
-        # extract relevant columns and print the recap table
-        challenges_data = challenges_data[to_show_challenge_data]
+    reward = reward.lower()
+    kind = kind.lower()
+    # Validate reward and kind filters
+    reward = '' if reward not in {'prize', 'points', 'knowledge'} else reward
+    kind = '' if kind not in {'competition', 'hackathon'} else kind
+    # Send request for challenge data
+    params = dict(per_page=1000, reward=reward, kind=kind)
+    response = requests.get(url, headers=headers, params=params)
+    data = response.json()['data']
+    challenges_data = pd.DataFrame(data)
+    # Select relevant columns
+    challenges_data = challenges_data[
+        ["id", "kind", "subtitle", "reward", "type_of_problem", "data_type",
+         "secret_code_required", "sealed"]
+    ]
     return challenges_data
 
 
-## challenge index selector
 def challenge_idx_selector(n_challenges):
-    """Get on the keyboard the index of the challenge tha the user want to participate in.
+    """Get input on the index of the challenge that the user wants to
+    participate in.
 
     Parameters
     ----------
@@ -277,112 +267,84 @@ def challenge_idx_selector(n_challenges):
     challenge_index : int
         The index of the challenge selected by the user.
     """
-
     challenge_index = -1
 
     while True:
-        user_input = input("Type the index of the challenge you want to select or 'q' to exit.\n>>")
-        try: # user_input must be a valid integer or 'q' else we stay in the infinite loop
-            user_input = int( user_input.strip() )
-
-            if (user_input >= 0) and (user_input < n_challenges):
-                challenge_index = user_input
+        user_input = input("Type the index of the challenge you want to"
+                           + "select or 'q' to exit.\n>> ")
+        try:  # user_input must be a valid integer or 'q'
+            user_input = int(user_input)
+        except ValueError:
+            if user_input.lower().strip() == 'q':  # 'q' stops selection
                 return challenge_index
-            else:
-                raise Exception()
-        except:
-            if user_input.lower().strip() == 'q': # to stop selection 
-                return challenge_index 
-            else:
-                print("\n[ 🔴 ] Please enter a correct challenge index.\n")
+
+        if 0 <= user_input < n_challenges:  # a valid zero-based index
+            return user_input
+        else:
+            print(f"""
+[ 🔴 ] Please enter a correct challenge index, between 0 and {n_challenges - 1}
+""")
 
 
-##  Info about the challenges user participate in
-def participations(challenge_id, headers):
-    """Check if user is in team for a the Zindi's challenges.
-
-    Parameters
-    ----------
-    challenge_id : string
-        The id of the selected challenge.
-    headers : dictionary
-        The headers of the request to participate in a challenge.  
-
-    Returns
-    -------
-    challenges_data : pd.DataFrame
-        The response of the request to get informations about the available challenges.
-    """
-    url = "https://api.zindi.africa/v1/participations"
-    response = requests.get( url, headers=headers )
-    response.raise_for_status() # check if there is no error
-    response = response.json()['data']
-    team_id = response[challenge_id]['team_id']
-    return team_id
-
-
-## Info about user position on lb 
-def user_on_lb(challengers_data, challenge_id, username, headers):
-    """Get rank of user on the leaderboard for a the Zindi's challenges.
+def get_user_rank(challengers_data, challenge_id, username, headers):
+    """Get the user's rank on the leaderboard of a Zindi challenge.
 
     Parameters
     ----------
-    challengers_data : dictionary | json
-        The json's response of the request to get informations about the leaderboard.
-    challenge_id : string
+    challengers_data : pandas.DataFrame
+        The response of the request for information about the leaderboard.
+    challenge_id : str
         The id of the selected challenge.
-    username : string
-        The username of the user.
-    headers : dictionary
-        The headers of the request to participate in a challenge.  
+    username : str
+        The user's username.
+    headers : dict
+        The headers for the request to participate in a challenge.
 
     Returns
     -------
     user_rank : int
         The rank of the user on the leaderboard of a challenge.
     """
-    df_lb = pd.DataFrame(challengers_data) # DataFrame verion of the leaderboard
-    df_lb = df_lb[ (df_lb.public_rank != None) ] # filter to use only leaderboard part with the active challengers
+    # Select only publicly ranked users
+    leaderboard_df = challengers_data.dropna(subset=['public_rank'])
+    username_or_teamtitle = leaderboard_df['username_or_teamtitle']
+
+    user_index = username_or_teamtitle[
+        username_or_teamtitle.str.contains(username)].index
     try:
-        team_id = participations(challenge_id=challenge_id, headers=headers)
-        # Simple user
-        if  not team_id:
-            user = df_lb[df_lb['user'].astype(str).str.contains( username,)] # na=False, case=True, regex=False
-            user_index = user.index.values[0].astype(int)
-        # Team
-        else :
-            my_team = df_lb[df_lb['team'].astype(str).str.contains(team_id,)]
-            user_index = my_team.index.values[0].astype(int)
-        user_rank = user_index + 1
-    except:
-        user_rank = 0 # rank initialization if user is not yet active for the challenge
+        user_rank = user_index[0] + 1  # since index is zero-based
+    except IndexError:  # user_index is empty, so user is not in leaderboard
+        user_rank = 0
+
     return user_rank
 
 
-## Info about number of submissions to do by day
-def n_subimissions_per_day( url, headers ):
-    """Get the number of submissions we can make per day for the selected challenge.
+def get_submissions_per_day(url, headers):
+    """Get the number of submissions the user can make to the selected
+    challenge per day.
 
     Parameters
     ----------
-    url : {'prize', 'points', 'knowledge' , 'all'}, default='all'
-        The reward of the challenges for top challengers.
-    headers : dictionary ,
-        The headers of the request.
+    url : str
+        The the url to the challenge.
+    headers : dict
+        The headers for the request.
     Returns
     -------
-    n_sub : int, default=0 : Means error during info retrieval.
-        The number of submissions we can make per day.
+    A string with the submission limit info.
     """
 
-    response = requests.get( url=url, headers=headers )
+    response = requests.get(url=url, headers=headers)
     response = response.json()['data']
-    for info in response['pages']:
-        if info['title'] == 'Rules' :
-            break
-    n_sub = info['content_html'].split( "You may make a maximum of")[-1].split("submissions per day.")[0].strip()
-    try: # raise error if there is any problem
-        n_sub = int(n_sub)
-    except: # else n of subimission_per_day is unknown
-        n_sub = 0
-    return n_sub
+
+    # Get the rules section
+    rules = response['pages'][2]['content_html']
+    submission_limit = re.findall(
+        r'You may make a maximum of \d+ submissions per day', rules)
+
+    if submission_limit != []:
+        submission_info = submission_limit[0]
+        daily_limit = re.findall(r'\d+', submission_info)[0]
+        return int(daily_limit)
+    else:
+        return "Couldn't get the daily submission limit"
