@@ -4,3 +4,5 @@ dist/*
 build/*
 *.egg-info
 dataset
+Untitled*.ipynb
+.ipynb_checkpoints
