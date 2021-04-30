@@ -18,12 +18,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/eaedk/testing-zindi-package",
     packages=["zindi"],
-    install_requires=["tdqm", "requests", "pandas", "requests-toolbelt" ],
+    install_requires=["pandas", "requests", "requests-toolbelt", "tdqm"],
     classifiers=[
         "Development Status :: 4 - Beta",
-        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
     ],
     python_requires=">=3.5",
 )
