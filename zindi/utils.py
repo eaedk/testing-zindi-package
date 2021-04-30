@@ -271,7 +271,7 @@ def challenge_idx_selector(n_challenges):
 
     while True:
         user_input = input("Type the index of the challenge you want to"
-                           + "select or 'q' to exit.\n>> ")
+                           + " select or 'q' to exit.\n>> ")
         try:  # user_input must be a valid integer or 'q'
             user_input = int(user_input)
         except ValueError:

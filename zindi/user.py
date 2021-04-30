@@ -61,23 +61,28 @@ class Zindian:
 
     @property
     def which_challenge(self):
-        """Get information about the currently selected challenge."""
-
+        """Display the currently selected challenge."""
         self._check_if_a_challenge_is_selected()
 
-        print("\n[ 🟢 ] You are currently enrolled in:",
-              f"{self._challenge_data['id']} challenge,\n",
-              f"\t{self._challenge_data['subtitle']}.")
-        return self._challenge_data['id']
+        return self._current_challenge
 
     @property
-    def my_rank(self,):
-        """Get the user's rank on the leaderboard for the selected challenge.
+    def my_rank(self):
+        """The user's rank on the leaderboard for the selected challenge.
         """
         self._check_if_a_challenge_is_selected()
 
-        # Get leaderboard information
-        self.leaderboard(to_print=False)
+        return self._user_rank_text
+
+    def _get_user_rank_text(self):
+        """Get the user's rank on the leaderboard for the selected challenge.
+
+        Returns
+        -------
+        A string with rank info.
+        """
+        self._check_if_a_challenge_is_selected()
+
         # Nicely format the rank
         if self._user_rank == 0:
             rank = "not yet"
@@ -91,26 +96,23 @@ class Zindian:
             rank = f"{self._user_rank}rd"
         else:
             rank = f"{self._user_rank}th"
-        print(f"\n[ 🟢 ] You are {rank} on the leaderboad for",
-              f"{self._challenge_data['id']} challenge. Carry on...")
 
-        return self._user_rank
+        return f"[ 🟢 ] You are {rank} on the leaderboad for"\
+               + f" {self._challenge_data['id']} challenge. Carry on..."
 
     @property
     def remaining_submissions(self):
-        """Get the number of remaining submissions for the selected
+        """The number of submissions that can be made to the selected
         challenge.
-
-        Returns
-        -------
-        free_submissions : int
-            The number of remaining submissions.
         """
         self._check_if_a_challenge_is_selected()
 
-        # Fetch fresh submission data, just in case submissions have been made
-        self.submission_board(to_print=False)
+        return self._remaining_submissions
 
+    def _get_remaining_submissions(self):
+        """Get the number of remaining submissions for the selected
+        challenge.
+        """
         if self._submission_data.shape[0] > 0:  # If submissions have been made
             # Select useful columns
             submissions_df = self._submission_data[
@@ -133,11 +135,10 @@ class Zindian:
             free_submissions = daily_sub_limit - n_submitted_today
             rem_subs = f'You have {free_submissions} submissions left today'
         else:
-            rem_subs = free_submissions = daily_sub_limit
-        print(f"\n[ 🟢 ] You have made {n_submitted_today} submissions today.",
-              f"{rem_subs} for the challenge {self._challenge_data['id']}.")
+            rem_subs = daily_sub_limit
 
-        return free_submissions
+        return f"[ 🟢 ] You have made {n_submitted_today} submissions today."\
+               + f"{rem_subs} for the challenge {self._challenge_data['id']}."
 
     def _check_if_a_challenge_is_selected(self):
         """Check whether a challenge is selected. Raises an exception if none
@@ -183,12 +184,21 @@ class Zindian:
                                     + f"{self._challenge_data['id']}"
             self._challenge_selected = True
 
-            print("[ 🟢 ] You have selected the challenge :",
-                  f"{self._challenge_data['id']}\n",
+            print("[ 🟢 ] You have selected the challenge:",
+                  f"{self._challenge_data['id']!r}\n",
                   f"\t{self._challenge_data['subtitle']}")
             utils.join_challenge(
                 url=f"{self._competition_url}/participations",
                 headers=self._headers)
+
+            self._current_challenge = "[ 🟢 ] You are currently enrolled in "\
+                + f"{self._challenge_data['id']!r} challenge: " \
+                + f"{self._challenge_data['subtitle']}."
+
+            # Refresh user data, so that the user gets the right information
+            # after switching challenges.
+            self.leaderboard(to_print=False)
+            self.submission_board(to_print=False)
 
     def download_dataset(self, destination="data"):
         """Download the dataset for the selected challenge.
@@ -253,6 +263,12 @@ class Zindian:
                         headers=self._headers).json()['data']
                     print(f"\n[ 🟢 ] Submission ID: {response['id'] } - File",
                           f"submitted: {filepath}\n")
+                    print(
+                        "Use `user.leaderboard()` to check if your score has",
+                        "improved, and `user.submission-board()` to view your",
+                        "submissions. Please note that changes sometimes take",
+                        "time to reflect."
+                    )
                 except Exception as error:
                     print(f"\n[ 🔴 ] Something went wrong: {error}")
 
@@ -316,7 +332,9 @@ class Zindian:
         self._user_rank = utils.get_user_rank(
             challengers_data=self._user_data, headers=self._headers,
             challenge_id=self._challenge_data['id'],
-            username=self._username,)
+            username=self._username)
+
+        self._user_rank_text = self._get_user_rank_text()
 
         if to_print:
             utils.print_leaderboard(challengers_data=self._user_data,
@@ -348,6 +366,8 @@ class Zindian:
 
             if to_print:
                 utils.print_submission_board(self._submission_data)
+
+            self._remaining_submissions = self._get_remaining_submissions()
 
     def create_team(self, team_name, teammates=None):
         """Create a team for the selected challenge.
