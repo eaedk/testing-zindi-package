@@ -2,3 +2,4 @@ tdqm
 requests
 pandas
 requests-toolbelt
+sphinx  # for the docs
