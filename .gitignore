@@ -1,7 +1,7 @@
 __pycache__
 venv
 dist/*
-build/*
+build
 *.egg-info
 dataset
 Untitled*.ipynb
