@@ -28,7 +28,8 @@ def file_download(url=None, filepath=None, headers=None):
     # Check if a HTTPError occured
     response.raise_for_status()
     # Get number of 1KiB chunks
-    content_size_kib = int(response.headers.get('content-length', 0)) / 1024
+    content_size_kib = \
+        int(response.headers.get('content-length', 0)) // 1024 + 1
     # Write the content to file in 1KiB chunks
     with filepath.open(mode='wb') as file:
         for chunk in tqdm(response.iter_content(chunk_size=1024), unit='KiB',
