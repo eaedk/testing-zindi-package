@@ -385,7 +385,12 @@ class Zindian:
             params_in_url = {
                 "per_page": 1000
             }  # per_page : max number of subimission to retrieve
-            response = requests.get(url, headers=headers, params=params_in_url)
+            response = requests.get(
+                url,
+                headers=headers,
+                data={"auth_token": headers["auth_token"]},
+                params=params_in_url,
+            )
             response = response.json()["data"]
             if "errors" in response:
                 error_msg = f"\n[ 🔴 ] {response['errors']}\n"
