@@ -47,12 +47,15 @@ class Test(unittest.TestCase):
     ):
         self.assertIsNone(self.user.which_challenge)
 
+    def test_select_challenge(
+        self,
+    ):
+        self.user.select_a_challenge(fixed_index=3)
+
     def test_which_challenge_positive(
         self,
     ):
-        self.assertIsNone(self.user.which_challenge)
-        print(self.user.which_challenge)
-        print(type(self.user.which_challenge))
+        self.assertIsNotNone(self.user.which_challenge)
 
 
 # # user.which_challenge # assertIsNotNone
