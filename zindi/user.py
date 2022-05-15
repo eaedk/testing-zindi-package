@@ -391,6 +391,7 @@ class Zindian:
                 data={"auth_token": headers["auth_token"]},
                 params=params_in_url,
             )
+            print(response)
             response = response.json()["data"]
             if "errors" in response:
                 error_msg = f"\n[ 🔴 ] {response['errors']}\n"
