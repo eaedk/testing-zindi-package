@@ -245,10 +245,15 @@ class Zindian:
             os.makedirs(destination, exist_ok=True)
         if self.__challenge_selected:
             headers = {**self.__headers, "auth_token": self.__auth_data["auth_token"]}
+            data = {"auth_token": self.__auth_data["auth_token"]}
             url = self.__api
 
-            response = requests.get(url, headers=headers)
-            datafiles = response.json()["data"]["datafiles"]
+            response = requests.get(url, headers=headers, data=data)
+            datafiles_ = response.json()["data"]["datafiles"]
+            datafiles = []
+            [
+                datafiles.append(i) for i in datafiles_ if i not in datafiles
+            ]  # remove deplicates
 
             # DOWNLOAD FILES USING ANOTHER METHOD TO SAVE THE ABILITY OF MULTIPROCESSING
             [
@@ -409,9 +414,11 @@ class Zindian:
         """
 
         if self.__challenge_selected:
-            headers = {**self.__headers, "auth_token": self.__auth_data["auth_token"]}
+            headers = {
+                **self.__headers,
+            }
             url = f"{self.__api}/my_team"
-            data = {"title": team_name}
+            data = {"title": team_name, "auth_token": self.__auth_data["auth_token"]}
 
             response = requests.post(url, headers=headers, data=data)
             response = response.json()["data"]
@@ -453,7 +460,10 @@ class Zindian:
         """
 
         if self.__challenge_selected:
-            headers = {**self.__headers, "auth_token": self.__auth_data["auth_token"]}
+            headers = {
+                **self.__headers,
+            }
+            data = {"auth_token": self.__auth_data["auth_token"]}
             url = f"{self.__api}/my_team/invite"
 
             for zindian in zindians:
@@ -484,13 +494,13 @@ class Zindian:
         """Disband user team for the selected challenge."""
 
         if self.__challenge_selected:
-            headers = {**self.__headers, "auth_token": self.__auth_data["auth_token"]}
+            headers = {
+                **self.__headers,
+            }
+            data = {"auth_token": self.__auth_data["auth_token"]}
             url = f"{self.__api}/my_team"
 
-            response = requests.delete(
-                url,
-                headers=headers,
-            )
+            response = requests.delete(url, headers=headers, data=data)
             response = response.json()["data"]
             if "errors" in response:
                 error_msg = f"\n[ 🔴 ] {response['errors']}\n"

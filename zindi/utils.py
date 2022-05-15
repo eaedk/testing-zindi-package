@@ -19,7 +19,9 @@ def download(url="https://", filename="", headers=""):
         The headers of the download's request.
     """
 
-    response = requests.post(url, headers=headers, stream=True)
+    response = requests.post(
+        url, headers=headers, data={"auth_token": headers["auth_token"]}, stream=True
+    )
     response.raise_for_status()  # check if there is no error
     total = int(response.headers.get("content-length", 0))
     with open(filename, "wb") as file, tqdm(
@@ -81,6 +83,7 @@ def upload(filepath, comment, url, headers):
         response = requests.post(
             url,
             data=multipart_monitor,
+            params={"auth_token": headers["auth_token"]},
             headers=headers,
         )
     return response
@@ -360,7 +363,9 @@ def join_challenge(url, headers, code=False):
 
     # {secret_code: "cccccccccc"}
     if not code:
-        response = requests.post(url=url, headers=headers)
+        response = requests.post(
+            url=url, headers=headers, data={"auth_token": headers["auth_token"]}
+        )
     else:
         secret_code = input("Enter the secret code to join the challenge.\n>>")
         params = {"secret_code": secret_code}
@@ -369,7 +374,7 @@ def join_challenge(url, headers, code=False):
     response = response.json()["data"]
     if "errors" in response:  # raise error if request failed
         error = response["errors"]["message"]
-        if error == "already in":
+        if error in ["already in", "Great news! You've already joined the competition"]:
             # print(f"\n[ 🟢 ] {error}\n")
             pass
         elif error == "This competition requires a secret code to join.":
