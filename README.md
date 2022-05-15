@@ -63,7 +63,7 @@ We will update this table soon ... Now you can refer to the notebook and **Usage
 
 <div align='center'>
 
-| <img src='https://media-exp1.licdn.com/dms/image/C5103AQEWceAkHjUwVw/profile-displayphoto-shrink_400_400/0/1582378323644?e=1618444800&v=beta&t=dgTb6nwVBgbNzFOs8CLvoM_p2gYal4t0gStKWvfzcmk' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Emmanuel KOUPOH                        | <img src='https://media-exp1.licdn.com/dms/image/C4D35AQGOLlRWnmK5UA/profile-framedphoto-shrink_800_800/0/1611062726937?e=1613314800&v=beta&t=IpUAuxmIMhOrhzAV9rQe3BTJz-6kSN8CUZK8RKf1Jso' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Cédric MANOUAN                      | <img src='https://media-exp1.licdn.com/dms/image/C4D03AQH1XHqqND9Syg/profile-displayphoto-shrink_400_400/0/1588010132707?e=1618444800&v=beta&t=SHEg3OdAElJk8dUF7UZ-hZr_ydRZV6fRJW-YUgl4Pxw' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Muhamed TUO                      |
+| <img src='https://media-exp1.licdn.com/dms/image/C5103AQEWceAkHjUwVw/profile-displayphoto-shrink_100_100/0/1582378323644?e=1658361600&v=beta&t=HLQGLn2wqkq_Utgt3e0hiM-vBGZF8_-RRVAl12PP_N0' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Emmanuel KOUPOH                        | <img src='https://dric2018.github.io/static/media/pic1.19034710.png' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Cédric MANOUAN                      | <img src='https://media-exp1.licdn.com/dms/image/C4D03AQH1XHqqND9Syg/profile-displayphoto-shrink_400_400/0/1588010132707?e=1658361600&v=beta&t=qRhIGUjwBx9BnThdKR2kgbjkZDh0m2x5mx9FntgKPEA' width='100' height='100' style='border-radius:50%; margin:.8cm'> <br>Muhamed TUO                      |
 |--------------------------------------|-------------------------------|----------------------------------------------|
 | [eaedk](https://github.com/eaedk) | [dric2018](https://github.com/dric2018) | [NazarioR9](https://github.com/NazarioR9)|
 | [Emmanuel on linkedin](https://www.linkedin.com/in/esaïe-alain-emmanuel-dina-koupoh-7b974a17a) | [Cedric on linkedin](https://www.linkedin.com/in/cédric-pascal-emmanuel-manouan-ba9ba1181) | [Muhamed on linkedin](https://www.linkedin.com/in/muhamed-tuo-b1b3a0162) |
@@ -73,7 +73,7 @@ We will update this table soon ... Now you can refer to the notebook and **Usage
 
 
 Dont forget to visite [ZINDI Plateform](www.zindi.africa)<br>
-<img src='https://pbs.twimg.com/profile_images/1026842061587271680/NHtP1F7r_400x400.jpg' width='200' height='200' style='border-radius:50%; margin:.8cm'>
+<img src='https://media-exp1.licdn.com/dms/image/C4D1BAQFlZkR1frDd6w/company-background_10000/0/1632989550932?e=1653228000&v=beta&t=ApaXaPwZhe0UtIQp7gz_wF9eJKNrMMPp0xpnjS3vL9E' width='500' height='200' style='border-radius:5; margin:.8cm'>
 
 
 </div>

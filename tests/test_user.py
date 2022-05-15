@@ -50,12 +50,28 @@ class Test(unittest.TestCase):
     def test_select_challenge(
         self,
     ):
+        print(" select a challenge")
+        # user = Zindian(username=USERNAME, fixed_password=PASSWORD)
         self.user.select_a_challenge(fixed_index=3)
+        self.user.which_challenge
+        print(" select a challenge done")
 
-    def test_which_challenge_positive(
+    def test_boards(
         self,
     ):
-        self.assertIsNotNone(self.user.which_challenge)
+        self.user.select_a_challenge(fixed_index=3)
+        self.user.submission_board()
+        self.user.leaderboard()
+
+    def test_download_dataset(
+        self,
+    ):
+        self.user.select_a_challenge(fixed_index=3)
+        self.user.download_dataset(destination="./dataset")
+
+        self.user.submit(
+            filepaths=["./dataset/SampleSubmission.csv"], comments=["submission test"]
+        )
 
 
 # # user.which_challenge # assertIsNotNone
