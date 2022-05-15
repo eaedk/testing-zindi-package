@@ -39,9 +39,9 @@ user.remaining_subimissions                         # Get information about how 
 
 user.submission_board()                         # Show the user's Submission-board of the selected challenge
 
-user.download_dataset(destination="tests/dataset") # Download the dataset of the selected challenge
+user.download_dataset(destination="t./dataset") # Download the dataset of the selected challenge
 
-user.submit(filepaths=['tests/dataset/SampleSubmission.csv'], comments=['initial submission']) # Push a submission to Zindi : the SampleSubmission file
+user.submit(filepaths=['./dataset/SampleSubmission.csv'], comments=['initial submission']) # Push a submission to Zindi : the SampleSubmission file
 
 user.remaining_subimissions                             # Get information about how many submission you can still push now to Zindi
 
