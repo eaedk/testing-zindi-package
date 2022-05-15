@@ -1,0 +1,5 @@
+# command to run complete test
+## Linux
+python3 -m unittest tests.test_user
+## Windows
+python -m unittest tests.test_user
