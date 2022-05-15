@@ -73,7 +73,7 @@ We will update this table soon ... Now you can refer to the notebook and **Usage
 
 
 Dont forget to visite [ZINDI Plateform](www.zindi.africa)<br>
-<img src='https://media-exp1.licdn.com/dms/image/C4D1BAQFlZkR1frDd6w/company-background_10000/0/1632989550932?e=1653228000&v=beta&t=ApaXaPwZhe0UtIQp7gz_wF9eJKNrMMPp0xpnjS3vL9E' width='500' height='200' style='border-radius:5; margin:.8cm'>
+<img src='https://media-exp1.licdn.com/dms/image/C4D1BAQFlZkR1frDd6w/company-background_10000/0/1632989550932?e=1653228000&v=beta&t=ApaXaPwZhe0UtIQp7gz_wF9eJKNrMMPp0xpnjS3vL9E' width='90%' height='200' style='border-radius:5; margin:.8cm'>
 
 
 </div>
