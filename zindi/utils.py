@@ -19,7 +19,7 @@ def download(url="https://", filename="", headers=""):
         The headers of the download's request.
     """
 
-    response = requests.post(
+    response = requests.get(
         url, headers=headers, data={"auth_token": headers["auth_token"]}, stream=True
     )
     response.raise_for_status()  # check if there is no error
