@@ -172,7 +172,7 @@ class Zindian:
     # Challenge
     ## Select a challenge to participate in
     def select_a_challenge(
-        self, reward="all", kind="all", active="all", fixed_index=None
+        self, reward="all", kind="competition", active="all", fixed_index=None
     ):
         """Select a challenge among those available on Zindi, using filter options.
 
@@ -180,7 +180,7 @@ class Zindian:
         ----------
         reward : {'prize', 'points', 'knowledge' , 'all'}, default='all'
             The reward of the challenges for top challengers.
-        kind : {'competition', 'hackathon', 'all'}, default='all'
+        kind : {'competition', 'hackathon'}, default='competition'
             The kind of the challenges.
         active : {True, False, 'all'}, default='all'
             The status of the challenges.
