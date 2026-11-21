@@ -1,0 +1,32 @@
+# This repository has moved to https://github.com/eaedk/zindi-package.
+#
+# It is kept as a thin redirect so that old notebooks running
+#     pip install git+https://github.com/eaedk/testing-zindi-package.git
+# get the maintained package. Installing it installs `zindi` from the new
+# repository; `from zindi.user import Zindian` keeps working there.
+
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "testing-zindi-package"
+version = "1.0.0"
+description = "Moved to https://github.com/eaedk/zindi-package. Installing this installs the maintained zindi package."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "Emmanuel Koupoh", email = "emmanuelkoupoh@gmail.com" }]
+dependencies = [
+  "zindi @ git+https://github.com/eaedk/zindi-package.git#subdirectory=python",
+]
+
+[project.urls]
+Homepage = "https://github.com/eaedk/zindi-package"
+Documentation = "https://zindi.readthedocs.io/en/latest/"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+bypass-selection = true

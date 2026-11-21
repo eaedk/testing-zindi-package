@@ -1,4 +1,0 @@
-include README.md
-include requirements.py
-include LICENSE
-recursive-include zindi/*

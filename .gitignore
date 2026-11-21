@@ -1,3 +1,5 @@
-*__pycache__/
-*cache*/
-*dataset/
+__pycache__/
+*.egg-info/
+build/
+dist/
+.venv/
